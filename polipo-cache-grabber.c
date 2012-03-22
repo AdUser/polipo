@@ -6,7 +6,8 @@ AtomPtr configFile = NULL;
 AtomPtr diskCacheRoot = NULL;
 AtomPtr outputDir = NULL;
 
-enum { quiet, normal, verbose } msglevel = normal;
+enum { quiet, normal, extra } verbosity = normal;
+enum msglevel { error, warn, info, debug };
 int daemonise = 0; /* unused var */
 
 void
@@ -22,6 +23,24 @@ usage(int exitcode)
 ");
   }
 
+void
+msg(enum msglevel level, char *format, ...)
+  {
+    va_list ap;
+
+    if ((verbosity == quiet  && level <= error) || \
+        (verbosity == normal && level <= info)  || \
+        (verbosity == extra  && level <= debug))
+      {
+        va_start(ap, format);
+        fprintf(stderr, format, ap);
+        va_end(ap);
+      }
+
+    if (level <= error)
+      exit(EXIT_FAILURE);
+  }
+
 int main(int argc, char **argv)
   {
     char opt = 0;
@@ -33,8 +52,8 @@ int main(int argc, char **argv)
       {
         switch (opt)
           {
-            case 'q' : msglevel = quiet;   break;
-            case 'v' : msglevel = verbose; break;
+            case 'q' : verbosity = quiet; break;
+            case 'v' : verbosity = extra; break;
             case 'c' :
               if (configFile)
                 releaseAtom(configFile);
