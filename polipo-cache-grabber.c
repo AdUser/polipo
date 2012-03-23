@@ -107,7 +107,11 @@ int main(int argc, char **argv)
   {
     char opt = 0;
     int rc = 0;
+
     initAtoms();
+
+    preinitChunks();
+    preinitHttp();
     preinitDiskcache();
 
     if (argc < 2)
@@ -122,7 +126,7 @@ int main(int argc, char **argv)
             case 'c' :
               if (configFile)
                 releaseAtom(configFile);
-              configFile = internAtom(optarg);
+              rc = parseConfigFile(internAtom(optarg));
               break;
             case 'r' :
               if (diskCacheRoot)
@@ -139,8 +143,11 @@ int main(int argc, char **argv)
           }
       }
 
-    rc = parseConfigFile(configFile);
+    initChunks();
+    initHttp();
+/*  initDiskcache(); */
 
+    diskCacheRoot = expandTilde(diskCacheRoot);
     cache_walk(diskCacheRoot);
 
     exit(EXIT_SUCCESS);
