@@ -67,5 +67,6 @@ int writeoutToDisk(ObjectPtr object, int upto, int max);
 void dirtyDiskEntry(ObjectPtr object);
 int revalidateDiskEntry(ObjectPtr object);
 DiskObjectPtr readDiskObject(char *filename, struct stat *sb);
+DiskObjectPtr processObject(DiskObjectPtr dobjects, char *filename, struct stat *sb);
 void indexDiskObjects(FILE *out, const char *root, int r);
 void expireDiskObjects(void);
