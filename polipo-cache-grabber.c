@@ -16,6 +16,8 @@ void
 usage(int exitcode)
   {
     fprintf(stderr, "\
+Usage: polipo-cache-grabber <options>\n\
+\n\
   -h        This help.\n\
   -q        Show only errors.\n\
   -v        Show extra messages.\n\
@@ -23,6 +25,7 @@ usage(int exitcode)
   -r <dir>  Cache root. (default: try to detect from config file)\n\
   -O <dir>  Output directory.\n\
 ");
+    exit(exitcode);
   }
 
 void
@@ -103,7 +106,10 @@ int main(int argc, char **argv)
     initAtoms();
     preinitDiskcache();
 
-    while ((opt = getopt(argc, argv, "qvr:O:")) != -1)
+    if (argc < 2)
+      usage(EXIT_FAILURE);
+
+    while ((opt = getopt(argc, argv, "hqvc:r:O:")) != -1)
       {
         switch (opt)
           {
