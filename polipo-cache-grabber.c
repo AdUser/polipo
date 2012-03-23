@@ -38,7 +38,7 @@ msg(enum msglevel level, char *format, ...)
         (verbosity == extra  && level <= debug))
       {
         va_start(ap, format);
-        fprintf(stderr, format, ap);
+        vfprintf(stderr, format, ap);
         va_end(ap);
       }
 
