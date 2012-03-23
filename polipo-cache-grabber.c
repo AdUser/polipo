@@ -121,6 +121,7 @@ int main(int argc, char **argv)
               if (configFile)
                 releaseAtom(configFile);
               configFile = internAtom(optarg);
+              break;
             case 'r' :
               if (diskCacheRoot)
                 releaseAtom(diskCacheRoot);
