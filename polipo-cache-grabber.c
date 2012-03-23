@@ -47,7 +47,7 @@ msg(enum msglevel level, char *format, ...)
   }
 
 int
-cache_walk(char *path)
+cache_walk(AtomPtr diskCacheRoot)
   {
     DIR *dir;
     struct dirent *dirent;
@@ -58,6 +58,8 @@ cache_walk(char *path)
 
     char buf[BUFSIZE];
     unsigned long int i = 0;
+
+    DiskObjectPtr dobjects = NULL;
 
     if(diskCacheRoot == NULL || diskCacheRoot->length <= 0)
       msg(error, "Can't find cache root. Try to specify it manually. ('-r' option)\n");
@@ -138,6 +140,8 @@ int main(int argc, char **argv)
       }
 
     rc = parseConfigFile(configFile);
+
+    cache_walk(diskCacheRoot);
 
     exit(EXIT_SUCCESS);
   }
