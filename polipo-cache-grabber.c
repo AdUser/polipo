@@ -84,11 +84,13 @@ cache_walk(char *path)
                 ftsent->fts_info == FTS_NS ||
                 ftsent->fts_info == FTS_NSOK ?
                 ftsent->fts_statp : NULL);
-              i++;
+
+              if (ftsent->fts_info == FTS_F)
+                i++;
             }
 
         fts_close(fts);
-        msg(info, " done. %lu objects found.");
+        msg(info, " done. %lu objects found.\n", i);
       }
 
     if (dobjects)
