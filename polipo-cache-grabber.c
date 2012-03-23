@@ -10,6 +10,8 @@ enum { quiet, normal, extra } verbosity = normal;
 enum msglevel { error, warn, info, debug };
 int daemonise = 0; /* unused var */
 
+#define BUFSIZE 4096
+
 void
 usage(int exitcode)
   {
@@ -39,6 +41,59 @@ msg(enum msglevel level, char *format, ...)
 
     if (level <= error)
       exit(EXIT_FAILURE);
+  }
+
+int
+cache_walk(char *path)
+  {
+    DIR *dir;
+    struct dirent *dirent;
+
+    FTS *fts;
+    FTSENT *ftsent;
+    char *fts_argv[2];
+
+    char buf[BUFSIZE];
+    unsigned long int i = 0;
+
+    if(diskCacheRoot == NULL || diskCacheRoot->length <= 0)
+      msg(error, "Can't find cache root. Try to specify it manually. ('-r' option)\n");
+
+    if (diskCacheRoot->length >= BUFSIZE)
+      msg(error, "Path to cache root too long for me, increase BUFSIZE.\n");
+
+    memcpy(buf, diskCacheRoot->string, diskCacheRoot->length);
+    buf[diskCacheRoot->length] = '\0';
+
+    i = 0;
+    dir = NULL;
+    fts_argv[0] = buf;
+    fts_argv[1] = NULL;
+    fts = fts_open(fts_argv, FTS_LOGICAL, NULL);
+    if (fts)
+      {
+        msg(info, "Reading cache...");
+        while ((ftsent = fts_read(fts)) != NULL)
+          if (ftsent->fts_info != FTS_DP)
+            {
+              dobjects = processObject(dobjects,
+                ftsent->fts_path,
+                ftsent->fts_info == FTS_NS ||
+                ftsent->fts_info == FTS_NSOK ?
+                ftsent->fts_statp : NULL);
+              i++;
+            }
+
+        fts_close(fts);
+        msg(info, " done. %lu objects found.");
+      }
+
+    if (dobjects)
+      {
+        /* blah */
+      }
+
+    return 0;
   }
 
 int main(int argc, char **argv)
