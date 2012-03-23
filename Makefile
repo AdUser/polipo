@@ -12,7 +12,7 @@ DISK_CACHE_ROOT = /var/cache/polipo
 # To compile with GCC:
 
 # CC = gcc
-CDEBUGFLAGS = -Os -g -Wall -fno-strict-aliasing
+CDEBUGFLAGS = -O0 -g -Wall -fno-strict-aliasing
 
 # To compile on a pure POSIX system:
 
@@ -62,21 +62,22 @@ DEFINES = $(FILE_DEFINES) $(PLATFORM_DEFINES)
 
 CFLAGS = $(MD5INCLUDES) $(CDEBUGFLAGS) $(DEFINES) $(EXTRA_DEFINES)
 
-SRCS = util.c event.c io.c chunk.c atom.c object.c log.c diskcache.c main.c \
+SRCS = util.c event.c io.c chunk.c atom.c object.c log.c diskcache.c \
        config.c local.c http.c client.c server.c auth.c tunnel.c \
        http_parse.c parse_time.c dns.c forbidden.c \
-       md5import.c md5.c ftsimport.c fts_compat.c socks.c mingw.c
+       md5import.c md5.c ftsimport.c fts_compat.c socks.c mingw.c \
+       polipo-cache-grabber.c
 
-OBJS = util.o event.o io.o chunk.o atom.o object.o log.o diskcache.o main.o \
+OBJS = util.o event.o io.o chunk.o atom.o object.o log.o diskcache.o \
        config.o local.o http.o client.o server.o auth.o tunnel.o \
        http_parse.o parse_time.o dns.o forbidden.o \
        md5import.o ftsimport.o socks.o mingw.o
 
 polipo$(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o polipo$(EXE) $(OBJS) $(MD5LIBS) $(LDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o polipo$(EXE) "main.c" $(OBJS) $(MD5LIBS) $(LDLIBS)
 
 polipo-cache-grabber$(EXE): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o polipo-cache-grabber$(EXE) $(OBJS) $(MD5LIBS) $(LDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o polipo-cache-grabber$(EXE) "polipo-cache-grabber.c" $(OBJS) $(MD5LIBS) $(LDLIBS)
 
 ftsimport.o: ftsimport.c fts_compat.c
 
