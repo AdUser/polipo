@@ -57,9 +57,10 @@ cache_walk(AtomPtr diskCacheRoot)
     char *fts_argv[2];
 
     char buf[BUFSIZE];
-    unsigned long int i = 0;
+    unsigned long int i = 0, isdir;
 
     DiskObjectPtr dobjects = NULL;
+    DiskObjectPtr dobject  = NULL;
 
     if(diskCacheRoot == NULL || diskCacheRoot->length <= 0)
       msg(error, "Can't find cache root. Try to specify it manually. ('-r' option)\n");
@@ -95,9 +96,13 @@ cache_walk(AtomPtr diskCacheRoot)
         msg(info, " done. %lu objects found.\n", i);
       }
 
-    if (dobjects)
+    for (dobject = dobjects; dobject != NULL; dobject = dobject->next)
       {
-        /* blah */
+        i = strlen(dobject->location);
+        isdir = (i == 0 || dobject->location[i - 1] == '/');
+        if (!isdir)
+          fprintf(stdout, "%s\n", dobject->filename);
+        /* more filters here */
       }
 
     return 0;
