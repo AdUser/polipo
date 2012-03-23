@@ -24,6 +24,14 @@ Usage: polipo-cache-grabber <options>\n\
   -c <file> Config file of polipo. (default: try known locations)\n\
   -r <dir>  Cache root. (default: try to detect from config file)\n\
   -O <dir>  Output directory.\n\
+  -F type:<string>  Extract only files conforming some conditions.\n\
+Filter types:\n\
+    * host  Match against hostname. No regexps, only substring please.\n\
+    * path  Match against path to file.\n\
+    * size  Match file size. Modifiers:\n\
+              + (equal or greater),\n\
+              - (equal or smaller),\n\
+              = (exact size) (default, can be omitted)\n\
 ");
     exit(exitcode);
   }
