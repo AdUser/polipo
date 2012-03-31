@@ -6,9 +6,21 @@ AtomPtr configFile = NULL;
 AtomPtr diskCacheRoot = NULL;
 AtomPtr outputDir = NULL;
 
+typedef struct _DiskObjectFilter
+  {
+    uint32_t size_min;
+    uint32_t size_max;
+    AtomPtr hosts;
+    AtomPtr paths;
+    AtomPtr ctypes;
+  }
+DiskObjectFilter;
+
 enum { quiet, normal, extra } verbosity = normal;
 enum msglevel { error, warn, info, debug };
 int daemonise = 0; /* unused var */
+
+DiskObjectFilter filter;
 
 #define BUFSIZE 4096
 
@@ -120,6 +132,9 @@ int main(int argc, char **argv)
   {
     char opt = 0;
     int rc = 0;
+
+    filter.size_min =  0;
+    filter.size_max = -1;
 
     initAtoms();
 
