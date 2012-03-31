@@ -106,6 +106,14 @@ parse_size(char *str)
     return size; /* if value looks like '32456' */
   }
 
+#define ADD_FILTER(cmp,cmplen,ptr) \
+  else if (strncmp((str), (cmp), (cmplen)) == 0) \
+    { \
+      t = (ptr); \
+      (ptr) = internAtom(str + (cmplen)); \
+      (ptr)->next = t; \
+    }
+
 int
 cache_walk(AtomPtr diskCacheRoot)
   {
