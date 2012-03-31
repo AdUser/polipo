@@ -114,6 +114,48 @@ parse_size(char *str)
       (ptr)->next = t; \
     }
 
+void
+parse_filter_type(DiskObjectFilter *filter, char *str)
+  {
+    AtomPtr t = NULL;
+    uint32_t size = 0;
+
+    if (strncmp(str, "size:", 5) == 0)
+      {
+        switch (*(str + 5))
+          {
+            case '+':
+              size = parse_size(str + 5 + 1);
+              filter->size_min = size;
+              filter->size_max = -1;
+              break;
+            case '-':
+              size = parse_size(str + 5 + 1);
+              filter->size_min = 0;
+              filter->size_max = size;
+              break;
+            case '=':
+              size = parse_size(str + 5 + 1);
+              filter->size_min = size;
+              filter->size_max = size;
+              break;
+            default :
+              size = parse_size(str + 5);
+              filter->size_min = size;
+              filter->size_max = size;
+              break;
+          }
+      }
+    ADD_FILTER("path:", 5, filter->paths)
+    ADD_FILTER("host:", 5, filter->hosts)
+    ADD_FILTER("ctype:", 6, filter->ctypes)
+    else
+      {
+        fprintf(stderr, "Unknown filter type: %s.\n", str);
+        exit(EXIT_FAILURE);
+      }
+  }
+
 int
 cache_walk(AtomPtr diskCacheRoot)
   {
