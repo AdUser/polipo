@@ -235,7 +235,7 @@ int main(int argc, char **argv)
     if (argc < 2)
       usage(EXIT_FAILURE);
 
-    while ((opt = getopt(argc, argv, "hqvc:r:O:")) != -1)
+    while ((opt = getopt(argc, argv, "hqvc:r:O:F:")) != -1)
       {
         switch (opt)
           {
@@ -255,6 +255,9 @@ int main(int argc, char **argv)
               if (outputDir)
                 releaseAtom(outputDir);
               outputDir = internAtom(optarg);
+              break;
+            case 'F' :
+              parse_filter_type(&filter, optarg);
               break;
             case 'h' : usage(EXIT_SUCCESS); break;
             default  : usage(EXIT_FAILURE); break;
