@@ -66,6 +66,13 @@ msg(enum msglevel level, char *format, ...)
       exit(EXIT_FAILURE);
   }
 
+#define OVERFLOW(size, m) \
+  if (((uint32_t) ~0 / (m)) <= (size)) \
+  { \
+      fprintf(stderr, "Defined filter size too large.\n"); \
+      exit(EXIT_FAILURE); \
+  }
+
 uint32_t
 parse_size(char *str)
   {
@@ -81,21 +88,24 @@ parse_size(char *str)
         switch (c)
           {
             case '0':
+              OVERFLOW(size, 10)
               size *= 10;
               size += *p - '0';
               break;
             case 'G':
             case 'g':
+              OVERFLOW(size, 1024)
               size *= 1024;
             case 'M':
             case 'm':
+              OVERFLOW(size, 1024)
               size *= 1024;
             case 'K':
             case 'k':
+              OVERFLOW(size, 1024)
               size *= 1024;
             case 'B':
             case 'b':
-              size *= 1;
               return size; /* after first non-digit char */
               break;
             default :
