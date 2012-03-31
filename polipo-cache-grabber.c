@@ -66,6 +66,46 @@ msg(enum msglevel level, char *format, ...)
       exit(EXIT_FAILURE);
   }
 
+uint32_t
+parse_size(char *str)
+  {
+    char c = '\0';
+    char *p = str;
+    uint32_t size = 0;
+
+    if (str == NULL) return 0;
+
+    for (p = str; *p != '\0'; p++)
+      {
+        c = (*p >= '0' && *p <= '9') ? '0' : *p ;
+        switch (c)
+          {
+            case '0':
+              size *= 10;
+              size += *p - '0';
+              break;
+            case 'G':
+            case 'g':
+              size *= 1024;
+            case 'M':
+            case 'm':
+              size *= 1024;
+            case 'K':
+            case 'k':
+              size *= 1024;
+            case 'B':
+            case 'b':
+              size *= 1;
+              return size; /* after first non-digit char */
+              break;
+            default :
+              break;
+          }
+      }
+
+    return size; /* if value looks like '32456' */
+  }
+
 int
 cache_walk(AtomPtr diskCacheRoot)
   {
