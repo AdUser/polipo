@@ -297,5 +297,5 @@ int main(int argc, char **argv)
   }
 
 /*
-  vim: ts=2:expandtab:autoindent:sw=79:syntax=c
+  vim: ts=2:expandtab:autoindent:sw=79:syntax=c:foldmethod=syntax
  */
