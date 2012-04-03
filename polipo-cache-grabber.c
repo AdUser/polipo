@@ -6,6 +6,14 @@ AtomPtr configFile = NULL;
 AtomPtr diskCacheRoot = NULL;
 AtomPtr outputDir = NULL;
 
+/**
+ * filter by size  | min | max
+ * ----------------+-----+-----
+ * unset           |  0  |  0
+ * lower X bytes   |  0  |  X
+ * exact X bytes   |  X  |  X
+ * greater X bytes |  X  |  0
+ **/
 typedef struct _DiskObjectFilter
   {
     uint32_t size_min;
@@ -141,7 +149,7 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
               break;
             case '-':
               size = parse_size(str + 5 + 1);
-              filter->size_min = 0;
+              filter->size_min = 1;
               filter->size_max = size;
               break;
             case '=':
@@ -234,7 +242,7 @@ int main(int argc, char **argv)
     int rc = 0;
 
     filter.size_min =  0;
-    filter.size_max = -1;
+    filter.size_max =  0;
 
     initAtoms();
 
@@ -277,6 +285,10 @@ int main(int argc, char **argv)
     initChunks();
     initHttp();
 /*  initDiskcache(); */
+
+    if (filter.size_min != 0 || filter.size_max != 0)
+      msg(info, "Filter objects by size: %lu - %lu bytes\n", \
+                filter.size_min, filter.size_max);
 
     diskCacheRoot = expandTilde(diskCacheRoot);
     cache_walk(diskCacheRoot);
