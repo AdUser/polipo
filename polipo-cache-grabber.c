@@ -212,6 +212,28 @@ getHostname(char *buf, int buf_len, char *url)
   }
 
 int
+matchByHostname(DiskObjectFilter *filter, char *location)
+  {
+    AtomPtr hostname;
+    AtomPtr atom;
+    char buf[BUFSIZE];
+
+    if (getHostname(buf, BUFSIZE, location) == -1)
+      {
+        msg(warn, "BUFSIZE too small to fit hostname.\n");
+        return -1;
+      }
+
+    hostname = internAtom(buf);
+
+    for (atom = filter->hosts; atom != NULL; atom = atom->next)
+      if (hostname == atom)
+        return 1;
+
+    return 0;
+  }
+
+int
 cache_walk(AtomPtr diskCacheRoot)
   {
     DIR *dir;
