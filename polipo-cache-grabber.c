@@ -174,6 +174,43 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
       }
   }
 
+/**
+ * return value: 1 - all ok, 0 - nothing found, -1 - error
+ **/
+int
+getHostname(char *buf, int buf_len, char *url)
+  {
+    char *start = NULL;
+    char *end = NULL;
+    char *p = NULL;
+
+    if (url == NULL) return -1;
+
+    if ((p = strstr(url, "://")) != NULL)
+      start = p + 3;
+    else
+      start = url; /* ok, nice try */
+
+    end = start;
+
+    /* exclude hostname[/path/to/...] */
+    if ((p = strchr(start, '/')) != NULL && p != start)
+      end = p;
+
+    /* exclude [username:password@]hostname */
+    if ((p = strchr(start, '@')) != NULL && (p >= start && p <= end))
+      start = p + 1;
+
+    /* exclude hostname[:port] */
+    if ((p = strchr(start, ':')) != NULL && (p >= start && p <= end))
+      end = p;
+
+    strncpy(buf, start, end - start);
+    buf[end - start] = '\0';
+
+    return 1;
+  }
+
 int
 cache_walk(AtomPtr diskCacheRoot)
   {
