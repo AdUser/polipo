@@ -245,6 +245,7 @@ cache_walk(AtomPtr diskCacheRoot)
 
     char buf[BUFSIZE];
     unsigned long int i = 0, isdir;
+    unsigned long int matched = 0;
 
     DiskObjectPtr dobjects = NULL;
     DiskObjectPtr dobject  = NULL;
@@ -287,10 +288,35 @@ cache_walk(AtomPtr diskCacheRoot)
       {
         i = strlen(dobject->location);
         isdir = (i == 0 || dobject->location[i - 1] == '/');
-        if (!isdir)
-          fprintf(stdout, "%s\n", dobject->filename);
-        /* more filters here */
+        if (isdir)
+          continue;
+          msg(debug, "Analyzing: '%s'.\n", dobject->location);
+        if (filter.hosts != NULL)
+          if (matchByHostname(&filter, dobject->location) != 1)
+            {
+              msg(debug, "Not matched by any hostname filter.\n");
+              continue;
+            }
+        if (filter.size_min != 0 || filter.size_max != 0)
+          {
+            if (filter.size_min != 0 &&
+                filter.size_min > dobject->size)
+              {
+                msg(debug, "Not matched by minimal object size.\n");
+                continue;
+              }
+            if (filter.size_max != 0 &&
+                filter.size_max < dobject->size)
+              {
+                msg(debug, "Not matched by maximum object size.\n");
+                continue;
+              }
+          }
+        msg(info, "Matched: %s\n", dobject->location);
+        matched++;
       }
+
+    msg(info, "Total matched: %lu objects.\n", matched);
 
     return 0;
   }
