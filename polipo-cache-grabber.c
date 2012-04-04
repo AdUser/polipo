@@ -232,6 +232,30 @@ getHostname(char *buf, int buf_len, char *url)
     return 1;
   }
 
+/**
+ * return value: 1 - all ok, 0 - nothing found, -1 - error
+ **/
+int
+getPath(char *buf, int buf_len, char *url)
+  {
+    char *start = NULL;
+    char *p = NULL;
+
+    if (url == NULL) return -1;
+
+    start = ((p = strstr(url, "://")) == NULL) ? url : (p + 3);
+
+    start = ((p = strchr(start, '/')) == NULL) ? start : p;
+
+    strncpy(buf, start, buf_len);
+    buf[buf_len] = '\0';
+
+    if (url == start)
+      return 0;
+
+    return 1;
+  }
+
 int
 matchByHostname(DiskObjectFilter *filter, char *location)
   {
