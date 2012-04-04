@@ -508,6 +508,12 @@ int main(int argc, char **argv)
     initHttp();
 /*  initDiskcache(); */
 
+    if (outputDir == NULL)
+      {
+        msg(warn, "Output directory not set, assuming current dir.\n");
+        outputDir = internAtom("./");
+      }
+
     if (filter.size_min != 0 || filter.size_max != 0)
       msg(info, "Filter objects by size: %lu - %lu bytes\n", \
                 filter.size_min, filter.size_max);
