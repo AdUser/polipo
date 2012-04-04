@@ -178,6 +178,27 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
  * return value: 1 - all ok, 0 - nothing found, -1 - error
  **/
 int
+getFilename(char *buf, int buf_len, char *url)
+  {
+    char *p = NULL;
+
+    if (url == NULL) return -1;
+
+    if ((p = strrchr(url, '/')) != NULL)
+      {
+        p += 1;
+        strncpy(buf, p, buf_len);
+        buf[buf_len - 1] = '\0';
+        return 1;
+      }
+
+    return 0;
+  }
+
+/**
+ * return value: 1 - all ok, 0 - nothing found, -1 - error
+ **/
+int
 getHostname(char *buf, int buf_len, char *url)
   {
     char *start = NULL;
