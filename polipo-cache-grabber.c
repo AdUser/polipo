@@ -449,6 +449,8 @@ cache_walk(AtomPtr diskCacheRoot)
           }
         msg(info, "Matched: %s\n", dobject->location);
         matched++;
+
+        extractFile(dobject);
       }
 
     msg(info, "Total matched: %lu objects.\n", matched);
