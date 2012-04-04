@@ -395,7 +395,7 @@ cache_walk(AtomPtr diskCacheRoot)
     fts = fts_open(fts_argv, FTS_LOGICAL, NULL);
     if (fts)
       {
-        msg(info, "Reading cache...");
+        msg(info, "Reading cache...\n");
         while ((ftsent = fts_read(fts)) != NULL)
           if (ftsent->fts_info != FTS_DP)
             {
@@ -407,10 +407,13 @@ cache_walk(AtomPtr diskCacheRoot)
 
               if (ftsent->fts_info == FTS_F)
                 i++;
+
+              if (i % 100 == 0)
+                fprintf(stderr, "\r% 7lu objects read.", i);
             }
 
         fts_close(fts);
-        msg(info, " done. %lu objects found.\n", i);
+        msg(info, "\r... done. %lu objects found.\n", i);
       }
 
     for (dobject = dobjects; dobject != NULL; dobject = dobject->next)
