@@ -358,6 +358,12 @@ cache_walk(AtomPtr diskCacheRoot)
               msg(debug, "Not matched by any hostname filter.\n");
               continue;
             }
+        if (filter.paths != NULL)
+          if (matchByPath(&filter, dobject->location) != 1)
+            {
+              msg(debug, "Not matched by any path filter.\n");
+              continue;
+            }
         if (filter.size_min != 0 || filter.size_max != 0)
           {
             if (filter.size_min != 0 &&
