@@ -256,6 +256,74 @@ getPath(char *buf, int buf_len, char *url)
     return 1;
   }
 
+/**
+  * write file from cache to output directory
+  * return value: 1 - all ok, 0 - error, can continue, -1 - fatal error
+  **/
+int
+extractFile(DiskObjectPtr dobject)
+  {
+    char hostname[BUFSIZE];
+    char filename[BUFSIZE];
+    char buf[BUFSIZE * 2];
+    uint8_t read_buf[BUFSIZE];
+    int rc = 0;
+    int fd_in, fd_out;
+    ssize_t readed = 0;
+
+    if (getHostname(hostname, BUFSIZE, dobject->location) < 0)
+      return -1;
+
+    if (getFilename(filename, BUFSIZE, dobject->location) < 0)
+      return -1;
+
+    /* make output directory */
+    snprintf(buf, BUFSIZE * 2, "%s/%s",
+             atomString(outputDir), hostname);
+
+    rc = mkdir(buf, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    if (rc != 0 && errno != EEXIST)
+      msg(error, strerror(errno));
+
+    /* make output file */
+    snprintf(buf, BUFSIZE * 2, "%s/%s/%s",
+             atomString(outputDir), hostname, filename);
+
+    errno = 0;
+    if ((fd_out = open(buf, O_WRONLY | O_CREAT | O_EXCL | O_BINARY,
+                            S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+      {
+        msg(warn, "%s: %s\n", filename, strerror(errno));
+        return 0;
+      }
+
+    if ((fd_in = open(dobject->filename, O_RDONLY | O_BINARY)) < 0)
+      msg(warn, strerror(errno));
+
+    if (lseek(fd_in, dobject->body_offset, SEEK_SET) < 0)
+      {
+        msg(warn, "%s\n", strerror(errno));
+        if (fd_out)
+          close(fd_out);
+        return 0;
+      }
+
+    while ((readed = read(fd_in, read_buf, BUFSIZE)) > 0)
+      if (write(fd_out, read_buf, ((readed == BUFSIZE) ? BUFSIZE : readed)) != readed)
+        msg(warn, "%s\n", strerror(errno));
+
+    if (readed < 0)
+      {
+        msg(warn, strerror(errno));
+        return 0;
+      }
+
+    close(fd_in);
+    close(fd_out);
+
+    return 1;
+  }
+
 int
 matchByHostname(DiskObjectFilter *filter, char *location)
   {
