@@ -279,6 +279,22 @@ matchByHostname(DiskObjectFilter *filter, char *location)
   }
 
 int
+matchByPath(DiskObjectFilter *filter, char *location)
+  {
+    char path[BUFSIZE];
+    AtomPtr atom;
+
+    if (getPath(path, BUFSIZE, location) != 1)
+      return -1;
+
+    for (atom = filter->paths; atom != NULL; atom = atom->next)
+      if (strstr(path, atomString(atom)) != NULL)
+        return 1;
+
+    return 0;
+  }
+
+int
 cache_walk(AtomPtr diskCacheRoot)
   {
     DIR *dir;
