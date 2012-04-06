@@ -283,6 +283,7 @@ extractFile(DiskObjectPtr dobject)
              atomString(outputDir), hostname);
 
     rc = mkdir(buf, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    /* FIXME: create parent directories, if nesessary */
     if (rc != 0 && errno != EEXIST)
       msg(error, "%s\n", strerror(errno));
 
@@ -291,6 +292,7 @@ extractFile(DiskObjectPtr dobject)
              atomString(outputDir), hostname, filename);
 
     errno = 0;
+    /* FIXME: EEXIST handling */
     if ((fd_out = open(buf, O_WRONLY | O_CREAT | O_EXCL | O_BINARY,
                             S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
       {
