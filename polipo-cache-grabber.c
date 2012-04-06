@@ -366,9 +366,6 @@ matchByPath(DiskObjectFilter *filter, char *location)
 int
 cache_walk(AtomPtr diskCacheRoot)
   {
-    DIR *dir;
-    struct dirent *dirent;
-
     FTS *fts;
     FTSENT *ftsent;
     char *fts_argv[2];
@@ -389,8 +386,6 @@ cache_walk(AtomPtr diskCacheRoot)
     memcpy(buf, diskCacheRoot->string, diskCacheRoot->length);
     buf[diskCacheRoot->length] = '\0';
 
-    i = 0;
-    dir = NULL;
     fts_argv[0] = buf;
     fts_argv[1] = NULL;
     fts = fts_open(fts_argv, FTS_LOGICAL, NULL);
