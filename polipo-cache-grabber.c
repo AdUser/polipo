@@ -370,9 +370,12 @@ cache_walk(AtomPtr diskCacheRoot)
     FTSENT *ftsent;
     char *fts_argv[2];
 
+    struct stat *st = NULL;
     char buf[BUFSIZE];
     unsigned long int i = 0, isdir;
     unsigned long int matched = 0;
+    unsigned long int obj_found = 0;
+    unsigned long int obj_match = 0;
 
     DiskObjectPtr dobjects = NULL;
     DiskObjectPtr dobject  = NULL;
@@ -395,21 +398,35 @@ cache_walk(AtomPtr diskCacheRoot)
         while ((ftsent = fts_read(fts)) != NULL)
           if (ftsent->fts_info != FTS_DP)
             {
-              dobjects = processObject(dobjects,
-                ftsent->fts_path,
-                ftsent->fts_info == FTS_NS ||
-                ftsent->fts_info == FTS_NSOK ?
-                ftsent->fts_statp : NULL);
-
               if (ftsent->fts_info == FTS_F)
-                i++;
+                obj_found++;
 
-              if (i % 100 == 0)
-                fprintf(stderr, "\r% 7lu objects read.", i);
+              /* do anything possible to reduce number *
+               * of objects before reading them        */
+              if (filter.hosts != NULL &&
+                  matchByHostname(&filter, ftsent->fts_path + diskCacheRoot->length) != 1)
+                {
+                  msg(debug, "Not matched by any hostname filter.\n");
+                  continue;
+                }
+              st = (ftsent->fts_info == FTS_NS ||
+                    ftsent->fts_info == FTS_NSOK) ?
+                    NULL : ftsent->fts_statp;
+              /* we can do this, because size(diskobject) > size(body) */
+              if (filter.size_min != 0 && st != NULL &&
+                  filter.size_min > st->st_size)
+                {
+                  msg(debug, "Not matched by minimal object size.\n");
+                  continue;
+                }
+              /* maybe in next line is a bug with "st" */
+              obj_match++;
+              dobjects = processObject(dobjects, ftsent->fts_path, st);
             }
 
         fts_close(fts);
-        msg(info, "\r... done. %lu objects found.\n", i);
+        msg(info, "\r... done. %lu objects found (%lu filtered).\n",
+                  obj_found, obj_found - obj_match);
       }
 
     for (dobject = dobjects; dobject != NULL; dobject = dobject->next)
@@ -419,33 +436,18 @@ cache_walk(AtomPtr diskCacheRoot)
         if (isdir)
           continue;
           msg(debug, "Analyzing: '%s'.\n", dobject->location);
-        if (filter.hosts != NULL)
-          if (matchByHostname(&filter, dobject->location) != 1)
-            {
-              msg(debug, "Not matched by any hostname filter.\n");
-              continue;
-            }
+        if (filter.size_max != 0 &&
+            filter.size_max < dobject->size)
+          {
+            msg(debug, "Not matched by maximum object size.\n");
+            continue;
+          }
         if (filter.paths != NULL)
           if (matchByPath(&filter, dobject->location) != 1)
             {
               msg(debug, "Not matched by any path filter.\n");
               continue;
             }
-        if (filter.size_min != 0 || filter.size_max != 0)
-          {
-            if (filter.size_min != 0 &&
-                filter.size_min > dobject->size)
-              {
-                msg(debug, "Not matched by minimal object size.\n");
-                continue;
-              }
-            if (filter.size_max != 0 &&
-                filter.size_max < dobject->size)
-              {
-                msg(debug, "Not matched by maximum object size.\n");
-                continue;
-              }
-          }
         msg(info, "Matched: %s\n", dobject->location);
         matched++;
 
