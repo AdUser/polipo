@@ -487,7 +487,8 @@ int main(int argc, char **argv)
             case 'c' :
               if (configFile)
                 releaseAtom(configFile);
-              rc = parseConfigFile(internAtom(optarg));
+              if ((rc = parseConfigFile(internAtom(optarg))) != 1)
+                msg(error, "Config file parsing failed.\n");
               break;
             case 'r' :
               if (diskCacheRoot)
