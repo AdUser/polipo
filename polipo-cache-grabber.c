@@ -266,7 +266,8 @@ extractFile(DiskObjectPtr dobject)
     char hostname[BUFSIZE];
     char filename[BUFSIZE];
     char buf[BUFSIZE * 2];
-    uint8_t read_buf[BUFSIZE];
+    const size_t read_buf_size = 1024 * 64;
+    uint8_t read_buf[read_buf_size];
     int rc = 0;
     int fd_in, fd_out;
     ssize_t readed = 0;
@@ -308,8 +309,8 @@ extractFile(DiskObjectPtr dobject)
         return 0;
       }
 
-    while ((readed = read(fd_in, read_buf, BUFSIZE)) > 0)
-      if (write(fd_out, read_buf, ((readed == BUFSIZE) ? BUFSIZE : readed)) != readed)
+    while ((readed = read(fd_in, read_buf, read_buf_size)) > 0)
+      if (write(fd_out, read_buf, ((readed == read_buf_size) ? read_buf_size : readed)) != readed)
         msg(warn, "%s\n", strerror(errno));
 
     if (readed < 0)
