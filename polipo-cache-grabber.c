@@ -284,7 +284,7 @@ extractFile(DiskObjectPtr dobject)
 
     rc = mkdir(buf, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (rc != 0 && errno != EEXIST)
-      msg(error, strerror(errno));
+      msg(error, "%s\n", strerror(errno));
 
     /* make output file */
     snprintf(buf, BUFSIZE * 2, "%s/%s/%s",
