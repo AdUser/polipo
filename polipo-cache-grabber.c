@@ -301,13 +301,19 @@ extractFile(DiskObjectPtr dobject)
              atomString(outputDir), hostname, filename);
 
     errno = 0;
-    /* FIXME: EEXIST handling */
     if ((fd_out = open(buf, O_WRONLY | O_CREAT | O_EXCL | O_BINARY,
                             S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
-      {
-        msg(warn, "%s: %s\n", filename, strerror(errno));
-        return 0;
-      }
+      switch (errno)
+        {
+          case EEXIST :
+            msg(info, "File exists, skipped.\n");
+            return 1;
+            break;
+          default :
+            msg(warn, "%s\n", strerror(errno));
+            return 0;
+            break;
+        }
 
     if ((fd_in = open(dobject->filename, O_RDONLY | O_BINARY)) < 0)
       msg(warn, strerror(errno));
