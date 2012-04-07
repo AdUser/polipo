@@ -25,7 +25,7 @@ typedef struct _DiskObjectFilter
 DiskObjectFilter;
 
 enum { quiet, normal, extra, all } verbosity = normal;
-enum msglevel { error, warn, info, debug };
+enum msglevel { error, warn, status, info, debug };
 int daemonise = 0; /* unused var */
 
 DiskObjectFilter filter;
@@ -61,9 +61,9 @@ msg(enum msglevel level, char *format, ...)
   {
     va_list ap;
 
-    if ((verbosity == quiet  && level <= error) || \
-        (verbosity == normal && level <= warn)  || \
-        (verbosity == extra  && level <= info)  || \
+    if ((verbosity == quiet  && level <= error)  || \
+        (verbosity == normal && level <= status) || \
+        (verbosity == extra  && level <= info)   || \
         (verbosity == all    && level <= debug))
       {
         va_start(ap, format);
@@ -409,7 +409,7 @@ cache_walk(AtomPtr diskCacheRoot)
     fts = fts_open(fts_argv, FTS_LOGICAL, NULL);
     if (fts)
       {
-        msg(info, "Reading cache...\n");
+        msg(status, "Reading cache...\n");
         while ((ftsent = fts_read(fts)) != NULL)
           if (ftsent->fts_info != FTS_DP)
             {
@@ -440,7 +440,7 @@ cache_walk(AtomPtr diskCacheRoot)
             }
 
         fts_close(fts);
-        msg(info, "\r... done. %lu objects found (%lu filtered).\n",
+        msg(status, "\r... done. %lu objects found (%lu filtered).\n",
                   obj_found, obj_found - obj_match);
       }
 
@@ -469,7 +469,7 @@ cache_walk(AtomPtr diskCacheRoot)
         extractFile(dobject);
       }
 
-    msg(info, "Total matched: %lu objects.\n", matched);
+    msg(status, "Total matched: %lu objects.\n", matched);
 
     return 0;
   }
