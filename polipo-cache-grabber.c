@@ -270,7 +270,7 @@ extractFile(DiskObjectPtr dobject)
     uint8_t read_buf[read_buf_size];
     int rc = 0;
     int fd_in, fd_out;
-    ssize_t readed = 0;
+    ssize_t bytes_read = 0;
 
     if (getHostname(hostname, BUFSIZE, dobject->location) < 0)
       return -1;
@@ -311,11 +311,11 @@ extractFile(DiskObjectPtr dobject)
         return 0;
       }
 
-    while ((readed = read(fd_in, read_buf, read_buf_size)) > 0)
-      if (write(fd_out, read_buf, ((readed == read_buf_size) ? read_buf_size : readed)) != readed)
+    while ((bytes_read = read(fd_in, read_buf, read_buf_size)) > 0)
+      if (write(fd_out, read_buf, ((bytes_read == read_buf_size) ? read_buf_size : bytes_read)) != bytes_read)
         msg(warn, "%s\n", strerror(errno));
 
-    if (readed < 0)
+    if (bytes_read < 0)
       {
         msg(warn, strerror(errno));
         return 0;
