@@ -293,7 +293,6 @@ extractFile(DiskObjectPtr dobject)
              atomString(outputDir), hostname);
 
     rc = mkdir(buf, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    /* FIXME: create parent directories, if nesessary */
     if (rc != 0 && errno != EEXIST)
       msg(error, "%s\n", strerror(errno));
 
@@ -443,6 +442,9 @@ cache_walk(AtomPtr diskCacheRoot)
         msg(status, "\r... done. %lu objects found (%lu filtered).\n",
                   obj_found, obj_found - obj_match);
       }
+
+    if (stat(atomString(outputDir), st) != 0)
+       msg(error, "%s: %s\n", atomString(outputDir), strerror(errno));
 
     for (dobject = dobjects; dobject != NULL; dobject = dobject->next)
       {
