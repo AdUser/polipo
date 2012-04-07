@@ -278,6 +278,15 @@ extractFile(DiskObjectPtr dobject)
     if (getFilename(filename, BUFSIZE, dobject->location) < 0)
       return -1;
 
+    /* handles "filename too long" case */
+    if (strlen(filename) > NAME_MAX)
+      {
+        msg(warn, "Filename extracted from url exeeds NAME_MAX limit. "
+                  "Will use generated filename.\n");
+        if (getFilename(filename, BUFSIZE, dobject->filename) < 0)
+          return -1;
+      }
+
     /* make output directory */
     snprintf(buf, BUFSIZE * 2, "%s/%s",
              atomString(outputDir), hostname);
