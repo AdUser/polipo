@@ -358,6 +358,7 @@ matchByHostname(DiskObjectFilter *filter, char *location)
       if (strstr(hostname, atomString(atom)) != NULL)
         return 1;
 
+    msg(debug, "Not matched by any hostname filter.\n");
     return 0;
   }
 
@@ -374,6 +375,7 @@ matchByPath(DiskObjectFilter *filter, char *location)
       if (strstr(path, atomString(atom)) != NULL)
         return 1;
 
+    msg(debug, "Not matched by any path filter.\n");
     return 0;
   }
 
@@ -399,6 +401,7 @@ matchBySize(DiskObjectFilter *filter, int size)
     if (filter->size_min != 0 && filter->size_min <= size)
       return 1;
 
+    msg(debug, "Not matched by object size.\n");
     return 0;
   }
 
@@ -411,6 +414,7 @@ cache_walk(AtomPtr diskCacheRoot)
 
     struct stat *st = NULL;
     char buf[BUFSIZE];
+    char *p = NULL;
     unsigned long int i = 0, isdir;
     unsigned long int matched = 0;
     unsigned long int obj_found = 0;
@@ -442,22 +446,19 @@ cache_walk(AtomPtr diskCacheRoot)
 
               /* do anything possible to reduce number *
                * of objects before reading them        */
-              if (filter.hosts != NULL &&
-                  matchByHostname(&filter, ftsent->fts_path + diskCacheRoot->length) != 1)
-                {
-                  msg(debug, "Not matched by any hostname filter.\n");
-                  continue;
-                }
+              p = ftsent->fts_path + diskCacheRoot->length;
+              if (filter.hosts != NULL && matchByHostname(&filter, p) != 1)
+                continue;
+
               st = (ftsent->fts_info == FTS_NS ||
                     ftsent->fts_info == FTS_NSOK) ?
                     NULL : ftsent->fts_statp;
+
               /* we can do this, because size(diskobject) > size(body) */
               if (filter.size_min != 0 && st != NULL &&
                   filter.size_min > st->st_size)
-                {
-                  msg(debug, "Not matched by minimal object size.\n");
-                  continue;
-                }
+                continue;
+
               /* maybe in next line is a bug with "st" */
               obj_match++;
               dobjects = processObject(dobjects, ftsent->fts_path, st);
@@ -477,19 +478,12 @@ cache_walk(AtomPtr diskCacheRoot)
         isdir = (i == 0 || dobject->location[i - 1] == '/');
         if (isdir)
           continue;
-          msg(debug, "Analyzing: '%s'.\n", dobject->location);
-        if (filter.size_max != 0 &&
-            filter.size_max < dobject->size)
-          {
-            msg(debug, "Not matched by maximum object size.\n");
-            continue;
-          }
-        if (filter.paths != NULL)
-          if (matchByPath(&filter, dobject->location) != 1)
-            {
-              msg(debug, "Not matched by any path filter.\n");
-              continue;
-            }
+        msg(debug, "Analyzing: '%s'.\n", dobject->location);
+        if (matchBySize(&filter, dobject->size) != 1)
+          continue;
+        if (filter.paths != NULL &&
+            matchByPath(&filter, dobject->location) != 1)
+          continue;
         msg(info, "Matched: %s\n", dobject->location);
         matched++;
 
