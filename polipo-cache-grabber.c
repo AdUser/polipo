@@ -24,7 +24,7 @@ typedef struct _DiskObjectFilter
   }
 DiskObjectFilter;
 
-enum { quiet, normal, extra } verbosity = normal;
+enum { quiet, normal, extra, all } verbosity = normal;
 enum msglevel { error, warn, info, debug };
 int daemonise = 0; /* unused var */
 
@@ -62,8 +62,9 @@ msg(enum msglevel level, char *format, ...)
     va_list ap;
 
     if ((verbosity == quiet  && level <= error) || \
-        (verbosity == normal && level <= info)  || \
-        (verbosity == extra  && level <= debug))
+        (verbosity == normal && level <= warn)  || \
+        (verbosity == extra  && level <= info)  || \
+        (verbosity == all    && level <= debug))
       {
         va_start(ap, format);
         vfprintf(stderr, format, ap);
@@ -494,8 +495,8 @@ int main(int argc, char **argv)
       {
         switch (opt)
           {
-            case 'q' : verbosity = quiet; break;
-            case 'v' : verbosity = extra; break;
+            case 'q' : if (verbosity > quiet) verbosity--; break;
+            case 'v' : if (verbosity < all)   verbosity++; break;
             case 'c' :
               if (configFile)
                 releaseAtom(configFile);
