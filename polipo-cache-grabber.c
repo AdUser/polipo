@@ -330,20 +330,17 @@ extractFile(DiskObjectPtr dobject)
 int
 matchByHostname(DiskObjectFilter *filter, char *location)
   {
-    AtomPtr hostname;
     AtomPtr atom;
-    char buf[BUFSIZE];
+    char hostname[BUFSIZE];
 
-    if (getHostname(buf, BUFSIZE, location) == -1)
+    if (getHostname(hostname, BUFSIZE, location) == -1)
       {
         msg(warn, "BUFSIZE too small to fit hostname.\n");
         return -1;
       }
 
-    hostname = internAtom(buf);
-
     for (atom = filter->hosts; atom != NULL; atom = atom->next)
-      if (hostname == atom)
+      if (strstr(hostname, atomString(atom)) != NULL)
         return 1;
 
     return 0;
