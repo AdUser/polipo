@@ -133,6 +133,34 @@ parse_size(char *str)
       (ptr)->next = t; \
     }
 
+/* unlike parse_time, this function accepts time string in *
+ * arbitrary format, can be understanded by gettime()      */
+int
+_parse_time(time_t *time, char *strtime)
+  {
+    struct tm *t;
+
+    if (strtime == NULL)
+      return 0;
+
+    if (*strtime == '@')
+      {
+        *time = (time_t) atoi(strtime + 1);
+        return 1;
+      }
+
+    if ((t = getdate(strtime)) == NULL)
+      {
+        fprintf(stderr, "getdate call failed: %d\n", getdate_err);
+        return 0;
+      }
+
+    if ((*time = mktime(t)) == -1)
+      return 0;
+
+    return 1;
+  }
+
 void
 parse_filter_type(DiskObjectFilter *filter, char *str)
   {
