@@ -18,6 +18,8 @@ typedef struct _DiskObjectFilter
   {
     uint32_t size_min;
     uint32_t size_max;
+    time_t mtime_min;
+    time_t mtime_max;
     AtomPtr hosts;
     AtomPtr paths;
     AtomPtr ctypes;
@@ -52,7 +54,8 @@ Filter types:\n\
               + (equal or greater),\n\
               - (equal or smaller),\n\
               = (exact size) (default, can be omitted)\n\
-");
+    * mtime Match modification time. Format: [+-=][@]<time>\n\
+\n");
     exit(exitcode);
   }
 
@@ -166,6 +169,8 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
   {
     AtomPtr t = NULL;
     uint32_t size = 0;
+    time_t mtime;
+    char *p = NULL;
 
     if (strncmp(str, "size:", 5) == 0)
       {
@@ -190,6 +195,31 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
               size = parse_size(str + 5);
               filter->size_min = size;
               filter->size_max = size;
+              break;
+          }
+      }
+    else if (strncmp(str, "mtime:", 6) == 0)
+      {
+        p = str + 6;
+        if (*p == '+' || *p == '-' || *p == '=') p++;
+        if (_parse_time(&mtime, p) == 0)
+          msg(error, "Unrecognized date format: %s.\n");
+
+        p = str + 6;
+        switch (*p)
+          {
+            case '+' :
+              filter->mtime_min = mtime;
+              filter->mtime_max = time_t_max;
+              break;
+            case '-' :
+              filter->mtime_min = 1;
+              filter->mtime_max = mtime;
+              break;
+            case '=' :
+            default  :
+              filter->mtime_min = mtime;
+              filter->mtime_max = mtime;
               break;
           }
       }
