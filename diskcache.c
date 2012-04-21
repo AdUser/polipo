@@ -363,7 +363,7 @@ fssafe(char c)
 static int
 urlDirname(char *buf, int n, const char *url, int len)
 {
-    int i, j;
+    int i, j, k;
     if(len < 8)
         return -1;
     if(memcmp(url, "http://", 7) != 0)
@@ -382,6 +382,7 @@ urlDirname(char *buf, int n, const char *url, int len)
     if(buf[j - 1] != '/')
         buf[j++] = '/';
 
+    k = j;
     for(i = 7; i < len; i++) {
         if(i >= len || url[i] == '/')
             break;
@@ -396,6 +397,10 @@ urlDirname(char *buf, int n, const char *url, int len)
             buf[j++] = url[i]; if(j >= n) return -1;
         }
     }
+    buf[j] = '\0';
+    hostnameMangle(&buf[k], n - k);
+    fprintf(stderr, "%s\n", &buf[k]);
+    for (j = k; buf[j] != '\0' && j <= n ; j++);
     buf[j++] = '/'; if(j >= n) return -1;
     buf[j] = '\0';
     return j;
