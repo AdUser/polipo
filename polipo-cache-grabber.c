@@ -471,7 +471,7 @@ cache_walk(AtomPtr diskCacheRoot)
                   obj_found, obj_found - obj_match);
       }
 
-    if (stat(atomString(outputDir), st) != 0)
+    if (access(atomString(outputDir), F_OK | W_OK) != 0)
        msg(error, "%s: %s\n", atomString(outputDir), strerror(errno));
 
     for (dobject = dobjects; dobject != NULL; dobject = dobject->next)
