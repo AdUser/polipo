@@ -1,13 +1,21 @@
 /* Written by Alex 'AdUser' Z <ad_user@mail.ru> */
 
+#include <regex.h>
+
 typedef struct _Hostgroup {
-  char *pattern; /* grouping patern {substring, regex}*/
-  regex_t regex; /* can be NULL */
-  char groupname[1];
+  AtomPtr groupname;
+  regex_t *regex; /* can be NULL */
+  char pattern[1]; /* matching patern {substring, regex} */
 } HostgroupRec, *HostgroupPtr;
 
 typedef struct _HostgroupList {
   unsigned int length;
   unsigned int size;
-  HostgroupPtr *list
+  HostgroupPtr *list;
 } HostgroupListRec, *HostgroupListPtr;
+
+void preinitHostgroups(void);
+void initHostgroups(void);
+int   readHostgroupsFile(void);
+void parseHostgroupsFile(void);
+void hostnameMangle(char *, int);
