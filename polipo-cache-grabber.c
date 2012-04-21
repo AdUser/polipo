@@ -441,8 +441,10 @@ cache_walk(AtomPtr diskCacheRoot)
         while ((ftsent = fts_read(fts)) != NULL)
           if (ftsent->fts_info != FTS_DP)
             {
-              if (ftsent->fts_info == FTS_F)
-                obj_found++;
+              if (ftsent->fts_info != FTS_F)
+                continue;
+
+              obj_found++;
 
               /* do anything possible to reduce number *
                * of objects before reading them        */
