@@ -374,7 +374,7 @@ extractFile(DiskObjectPtr dobject)
         }
 
     if ((fd_in = open(dobject->filename, O_RDONLY | O_BINARY)) < 0)
-      msg(warn, strerror(errno));
+      msg(warn, "%s\n", strerror(errno));
 
     if (lseek(fd_in, dobject->body_offset, SEEK_SET) < 0)
       {
