@@ -205,6 +205,21 @@ void initHostgroups(void)
 
   }
 
+char *hostgroupMatch(char *url, int len)
+  {
+    HostgroupPtr hg = NULL;
+    unsigned int i = 0;
+
+    for (i = 0; (hg = hostgroups.list[i]) != 0; i++)
+       {
+        if (hg->regex == NULL && strstr(url, hg->pattern) != NULL)
+          return hg->groupname;
+        else if (hg->regex != NULL && regexec(hg->regex, url, 0, NULL, 0) == 0)
+          return hg->groupname;
+      }
+    return NULL;
+  }
+
 void
 hostnameMangle(char *buf, int n)
   {
