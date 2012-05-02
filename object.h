@@ -75,6 +75,7 @@ typedef struct _Object {
     struct _Condition condition;
     struct _DiskCacheEntry *disk_entry;
     struct _Object *next, *previous;
+    struct _Hostgroup *hostgroup;
 } ObjectRec, *ObjectPtr;
 
 typedef struct _CacheControl {

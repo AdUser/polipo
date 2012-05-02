@@ -208,6 +208,7 @@ makeObject(int type, const void *key, int key_size, int public, int fromdisk,
     object->key[key_size] = '\0';
     object->key_size = key_size;
     object->flags = (public?OBJECT_PUBLIC:0) | OBJECT_INITIAL;
+    object->hostgroup = hostgroupFind(object->key);
     if(public) {
         h = hash(object->type, object->key, object->key_size, 
                  log2ObjectHashTableSize);
