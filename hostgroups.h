@@ -19,4 +19,4 @@ void initHostgroups(void);
 int   readHostgroupsFile(void);
 void parseHostgroupsFile(void);
 HostgroupPtr hostgroupFind(char *);
-void hostnameMangle(char *, int);
+void hostnameMangle(char *, int *, char *, int);

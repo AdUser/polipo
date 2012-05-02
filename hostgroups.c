@@ -223,16 +223,27 @@ hostgroupFind(char *hostname)
   }
 
 void
-hostnameMangle(char *buf, int n)
+hostnameMangle(char *buf, int *n, char *url, int len)
   {
-    HostgroupPtr hg = NULL;
-    unsigned int i = 0;
+    char hostname[1024];
+    int i = 0;
+    int x, y, z, port;
+    HostgroupPtr hostgroup = NULL;
 
-    for (i = 0; (hg = hostgroups.list[i]) != 0; i++)
+    parseUrl(url, len, &x, &y, &port, &z);
+    memcpy(hostname, ((char *)url + x), y - x);
+    hostname[y - x] = '\0';
+
+    *n = len;
+    if ((hostgroup = hostgroupFind(hostname)) != NULL)
       {
-        if (hg->regex == NULL && strstr(buf, hg->pattern) != NULL)
-          strncpy(buf, atomString(hg->groupname), n);
-        else if (hg->regex != NULL && regexec(hg->regex, buf, 0, NULL, 0) == 0)
-          strncpy(buf, atomString(hg->groupname), n);
+        i = strlen(atomString(hostgroup->groupname));
+        memcpy(&buf[0], &url[0], x);
+        memcpy(&buf[x], atomString(hostgroup->groupname), i);
+        memcpy(&buf[x + i], &url[z], len - z);
+        buf[x + i + (len - z)] = '\0';
+        *n = strlen(buf);
       }
+    else
+      memcpy(buf, url, len);
   }
