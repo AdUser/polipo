@@ -955,7 +955,7 @@ validateEntry(ObjectPtr object, int fd,
         body_offset = n;
 
     if(!location || strlen(location) != object->key_size ||
-       memcmp(location, object->key, object->key_size) != 0) {
+       (object->hostgroup || memcmp(location, object->key, object->key_size) != 0)) {
         do_log(L_ERROR, "Inconsistent cache file for %s.\n", scrub(location));
         goto invalid;
     }
@@ -1144,6 +1144,8 @@ makeDiskEntry(ObjectPtr object, int create)
 {
     DiskCacheEntryPtr entry = NULL;
     char buf[1024];
+    char key[1024];
+    int key_size = 0;
     int fd = -1;
     int negative = 0, size = -1, name_len = -1;
     char *name = NULL;
@@ -1200,10 +1202,12 @@ makeDiskEntry(ObjectPtr object, int create)
     if(numDiskEntries > maxDiskEntries)
         destroyDiskEntry(diskEntriesLast->object, 0);
 
+    hostnameMangle(key, &key_size, object->key, object->key_size);
+
     if(!local) {
         if(diskCacheRoot == NULL || diskCacheRoot->length <= 0)
             return NULL;
-        name_len = urlFilename(buf, 1024, object->key, object->key_size);
+        name_len = urlFilename(buf, 1024, key, key_size);
         if(name_len < 0) return NULL;
         if(!negative)
             fd = open(buf, O_RDWR | O_BINARY);
@@ -1260,7 +1264,7 @@ makeDiskEntry(ObjectPtr object, int create)
             return NULL;
 
         name_len = 
-            localFilename(buf, 1024, object->key, object->key_size);
+            localFilename(buf, 1024, key, key_size);
         if(name_len < 0)
             return NULL;
         fd = open(buf, O_RDONLY | O_BINARY);
