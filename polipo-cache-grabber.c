@@ -551,9 +551,8 @@ cache_walk(AtomPtr diskCacheRoot)
 
         if (extracted % 10 == 0)
           msg(status, "\rExtracted: %3lu", extracted, obj_match);
-
-        msg(status, " ...done.\n");
       }
+    msg(status, " ...done.\n");
 
     return 0;
   }
