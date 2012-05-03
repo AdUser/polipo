@@ -474,9 +474,9 @@ cache_walk(AtomPtr diskCacheRoot)
     char buf[BUFSIZE];
     char *p = NULL;
     unsigned long int i = 0, isdir;
-    unsigned long int matched = 0;
     unsigned long int obj_found = 0;
     unsigned long int obj_match = 0;
+    unsigned long int extracted = 0;
 
     DiskObjectPtr dobjects = NULL;
     DiskObjectPtr dobject  = NULL;
@@ -544,13 +544,14 @@ cache_walk(AtomPtr diskCacheRoot)
         if (filter.paths != NULL &&
             matchByPath(&filter, dobject->location) != 1)
           continue;
-        msg(info, "Matched: %s\n", dobject->location);
-        matched++;
+        msg(debug, "Matched: %s\n", dobject->location);
 
-        extractFile(dobject);
+        if (extractFile(dobject) > 0)
+          extracted++;
+
+        msg(status, "\rExtracted: %3lu/%lu : %s",
+            extracted, obj_match, dobject->location);
       }
-
-    msg(status, "Total matched: %lu objects.\n", matched);
 
     return 0;
   }
