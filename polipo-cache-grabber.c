@@ -525,7 +525,7 @@ cache_walk(AtomPtr diskCacheRoot)
             }
 
         fts_close(fts);
-        msg(status, "\r... done. %lu objects found (%lu filtered).\n",
+        msg(status, "\r... done. %lu objects found (%lu skipped).\n",
                   obj_found, obj_found - obj_match);
       }
 
@@ -549,8 +549,10 @@ cache_walk(AtomPtr diskCacheRoot)
         if (extractFile(dobject) > 0)
           extracted++;
 
-        msg(status, "\rExtracted: %3lu/%lu : %s",
-            extracted, obj_match, dobject->location);
+        if (extracted % 10 == 0)
+          msg(status, "\rExtracted: %3lu", extracted, obj_match);
+
+        msg(status, " ...done.\n");
       }
 
     return 0;
