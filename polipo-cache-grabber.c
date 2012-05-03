@@ -550,8 +550,10 @@ cache_walk(AtomPtr diskCacheRoot)
           extracted++;
 
         if (extracted % 10 == 0)
-          msg(status, "\rExtracted: %3lu", extracted, obj_match);
+          msg(status, "\rExtracted: %3lu", extracted);
       }
+
+    msg(status, "\rExtracted: %3lu", extracted); /* show exact counter at last */
     msg(status, " ...done.\n");
 
     return 0;
