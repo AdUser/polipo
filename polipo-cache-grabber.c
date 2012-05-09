@@ -66,6 +66,9 @@ Filter types:\n\
     * mtime Match modification time. Format: [+-=]@<time>\n\
               '+' mean 'or later', '-' - 'or earlier' and '=' mean 'exact'\n\
               <time> should contain valid unixtime (date +%%s, for example)\n\
+    * age   The same as 'mtime:+@<time>', but 'time' is more human-frendly\n\
+              'time' should be in form: XX(d|m|y), where:\n\
+              XX - integer and modifiers: 'd' - day, 'm' - month, 'y' - year\n\
 \n");
     exit(exitcode);
   }
@@ -165,6 +168,54 @@ _parse_time(time_t *time, char *strtime)
     return 0;
   }
 
+int
+_parse_age(time_t *mtime, char *strtime)
+  {
+    time_t now = time(NULL);
+    struct tm *t;
+    long l = 0;
+    char *p = NULL;
+
+    if (strtime == NULL || mtime == NULL)
+      return 0;
+
+    t = localtime(&now);
+    l = strtol(strtime, &p, 10);
+
+    if (errno != 0)
+      msg(error, "%s: %s\n", strtime, strerror(errno));
+
+    switch (*p)
+      {
+        case 'y' :
+        case 'Y' :
+          t->tm_year -= (int) l;
+          *mtime = mktime(t);
+          break;
+        case 'm' :
+        case 'M' :
+          for (; l > 12; l -= 12)
+            t->tm_year -= 1;
+          if (l > t->tm_mon)
+            {
+              t->tm_year -= 1;
+              l -= t->tm_mon;
+              t->tm_mon = 12 - l;
+            }
+          *mtime = mktime(t);
+          break;
+        default  :
+          msg(warn, "Incorrect or missing modificator in 'age' filter."
+                    "Considered as 'day'.\n");
+        case 'd' :
+        case 'D' :
+          *mtime = now - (l * 86400);
+          break;
+      }
+
+    return 1;
+  }
+
 void
 parse_filter_type(DiskObjectFilter *filter, char *str)
   {
@@ -199,6 +250,18 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
               break;
           }
         filter->used_types |= FILTER_T_SIZE;
+      }
+    else if (strncmp(str, "age:", 4) == 0)
+      {
+        if (filter->used_types & FILTER_T_MTIME)
+          msg(error, "'age' can't be used with 'mtime'.\n");
+
+        p = str + 4;
+        if (_parse_age(&mtime, p) == 0)
+          msg(error, "Unrecognized date format: %s.\n");
+
+        filter->mtime_min = mtime;
+        filter->mtime_max = time(NULL);
       }
     else if (strncmp(str, "mtime:", 6) == 0)
       {
