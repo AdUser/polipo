@@ -511,11 +511,11 @@ matchBySize(DiskObjectFilter *filter, int size)
     if (filter == NULL)
       return -1;
 
-    if (size == 0)
-      return 0;
-
     if (filter->size_max == 0 && filter->size_min == 0)
       return 1;
+
+    if (size == 0)
+      return 0;
 
     if (filter->size_max != 0 && filter->size_min != 0)
       if (filter->size_max <= size && filter->size_min >= size)
