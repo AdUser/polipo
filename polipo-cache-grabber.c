@@ -579,7 +579,7 @@ cache_walk(AtomPtr diskCacheRoot)
     fts = fts_open(fts_argv, FTS_LOGICAL, NULL);
     if (fts)
       {
-        msg(status, "Reading cache...\n");
+        msg(status, "Reading cache");
         while ((ftsent = fts_read(fts)) != NULL)
           if (ftsent->fts_info != FTS_DP)
             {
@@ -612,7 +612,7 @@ cache_walk(AtomPtr diskCacheRoot)
             }
 
         fts_close(fts);
-        msg(status, "\r... done. %lu objects found (%lu skipped).\n",
+        msg(status, " ...done. %lu objects found (%lu skipped).\n",
                   obj_found, obj_found - obj_match);
       }
 
