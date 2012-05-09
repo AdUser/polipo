@@ -2,6 +2,8 @@
 /* based on forbidden.[ch] */
 #include "polipo.h"
 
+#ifndef NO_HOSTGROUPS
+
 #include <ctype.h>
 
 AtomPtr hostgroupsFile = NULL;
@@ -15,7 +17,7 @@ void preinitHostgroups(void)
                              "File specifying groups of hosts.");
   }
 
-int 
+int
 hostgroupListCons(HostgroupPtr hg, HostgroupListPtr list)
   {
     HostgroupPtr *new_list = NULL;
@@ -247,3 +249,19 @@ hostnameMangle(char *buf, int *n, char *url, int len)
     else
       memcpy(buf, url, len);
   }
+
+#else /* NO_HOSTGROUPS */
+
+void preinitHostgroups(void)
+  { return; }
+
+void initHostgroups(void)
+  { return; }
+
+HostgroupPtr hostgroupFind(char *hostname)
+  { return NULL; }
+
+void hostnameMangle(char *buf, int *n, char *url, int len)
+  { return; }
+
+#endif
