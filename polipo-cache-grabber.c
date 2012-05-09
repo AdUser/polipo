@@ -588,23 +588,27 @@ cache_walk(AtomPtr diskCacheRoot)
 
               obj_found++;
 
-              /* do anything possible to reduce number *
-               * of objects before reading them        */
-              p = ftsent->fts_path + diskCacheRoot->length;
-              if (filter.hosts != NULL && matchByHostname(&filter, p) != 1)
-                continue;
-
               st = (ftsent->fts_info == FTS_NS ||
                     ftsent->fts_info == FTS_NSOK) ?
                     NULL : ftsent->fts_statp;
 
-              /* we can do this, because size(diskobject) > size(body) */
-              if (filter.size_min != 0 && st != NULL &&
-                  filter.size_min > st->st_size)
+              /* do anything possible to reduce number *
+               * of objects before reading them        */
+              p = ftsent->fts_path + diskCacheRoot->length;
+              if ((filter.used_types & FILTER_T_HOST) &&
+                  matchByHostname(&filter, p) != 1)
                 continue;
 
-              if (st != NULL && matchByMtime(&filter, st->st_mtime) != 1)
-                continue;
+              if (st)
+                { /* we can do this, because size(diskobject) > size(body) */
+                  if (filter.used_types & FILTER_T_SIZE)
+                    if (filter.size_min > st->st_size)
+                      continue;
+
+                  if (filter.used_types & (FILTER_T_MTIME | FILTER_T_AGE))
+                    if(matchByMtime(&filter, st->st_mtime) != 1)
+                      continue;
+                }
 
               /* maybe in next line is a bug with "st" */
               obj_match++;
@@ -625,13 +629,14 @@ cache_walk(AtomPtr diskCacheRoot)
         isdir = (i == 0 || dobject->location[i - 1] == '/');
         if (isdir)
           continue;
-        msg(debug, "Analyzing: '%s'.\n", dobject->location);
-        if (matchBySize(&filter, dobject->size) != 1)
-          continue;
-        if (filter.paths != NULL &&
-            matchByPath(&filter, dobject->location) != 1)
-          continue;
-        msg(debug, "Matched: %s\n", dobject->location);
+
+        if (filter.used_types & FILTER_T_SIZE)
+          if (matchBySize(&filter, dobject->size) != 1)
+            continue;
+
+        if (filter.used_types & FILTER_T_PATH)
+          if (matchByPath(&filter, dobject->location) != 1)
+            continue;
 
         if (extractFile(dobject) > 0)
           extracted++;
