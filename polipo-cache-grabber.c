@@ -139,12 +139,13 @@ parse_size(char *str)
     return size; /* if value looks like '32456' */
   }
 
-#define ADD_FILTER(cmp,cmplen,ptr) \
+#define ADD_FILTER(cmp,cmplen,ptr,type) \
   else if (strncmp((str), (cmp), (cmplen)) == 0) \
     { \
       t = (ptr); \
       (ptr) = internAtom(str + (cmplen)); \
       (ptr)->next = t; \
+      filter->used_types |= type; \
     }
 
 /* unlike parse_time, this function accepts *
@@ -197,9 +198,13 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
               filter->size_max = size;
               break;
           }
+        filter->used_types |= FILTER_T_SIZE;
       }
     else if (strncmp(str, "mtime:", 6) == 0)
       {
+        if (filter->used_types & FILTER_T_AGE)
+          msg(error, "'mtime' can't be used with 'age'.\n");
+
         p = str + 6;
         if (*p == '+' || *p == '-' || *p == '=') p++;
         if (_parse_time(&mtime, p) == 0)
@@ -223,9 +228,9 @@ parse_filter_type(DiskObjectFilter *filter, char *str)
               break;
           }
       }
-    ADD_FILTER("path:", 5, filter->paths)
-    ADD_FILTER("host:", 5, filter->hosts)
-    ADD_FILTER("ctype:", 6, filter->ctypes)
+    ADD_FILTER("path:", 5, filter->paths, FILTER_T_PATH)
+    ADD_FILTER("host:", 5, filter->hosts, FILTER_T_HOST)
+    ADD_FILTER("ctype:", 6, filter->ctypes, FILTER_T_CTYPE)
     else
       {
         fprintf(stderr, "Unknown filter type: %s.\n", str);
