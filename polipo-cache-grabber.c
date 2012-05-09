@@ -6,6 +6,14 @@ AtomPtr configFile = NULL;
 AtomPtr diskCacheRoot = NULL;
 AtomPtr outputDir = NULL;
 
+#define FILTER_T_NONE   0x0000
+#define FILTER_T_SIZE   0x0001
+#define FILTER_T_HOST   0x0002
+#define FILTER_T_CTYPE  0x0004
+#define FILTER_T_PATH   0x0008
+#define FILTER_T_MTIME  0x0016
+#define FILTER_T_AGE    0x0032
+
 /**
  * filter by size  | min | max
  * ----------------+-----+-----
@@ -16,6 +24,7 @@ AtomPtr outputDir = NULL;
  **/
 typedef struct _DiskObjectFilter
   {
+    uint32_t used_types;
     uint32_t size_min;
     uint32_t size_max;
     time_t mtime_min;
@@ -555,6 +564,7 @@ int main(int argc, char **argv)
     char opt = 0;
     int rc = 0;
 
+    filter.used_types = FILTER_T_NONE;
     filter.size_min =  0;
     filter.size_max =  0;
 
