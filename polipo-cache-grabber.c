@@ -54,7 +54,9 @@ Filter types:\n\
               + (equal or greater),\n\
               - (equal or smaller),\n\
               = (exact size) (default, can be omitted)\n\
-    * mtime Match modification time. Format: [+-=][@]<time>\n\
+    * mtime Match modification time. Format: [+-=]@<time>\n\
+              '+' mean 'or later', '-' - 'or earlier' and '=' mean 'exact'\n\
+              <time> should contain valid unixtime (date +%%s, for example)\n\
 \n");
     exit(exitcode);
   }
@@ -136,14 +138,12 @@ parse_size(char *str)
       (ptr)->next = t; \
     }
 
-/* unlike parse_time, this function accepts time string in *
- * arbitrary format, can be understanded by gettime()      */
+/* unlike parse_time, this function accepts *
+ * time string in unixtime format           */
 int
 _parse_time(time_t *time, char *strtime)
   {
-    struct tm *t;
-
-    if (strtime == NULL)
+    if (strtime == NULL || time == NULL)
       return 0;
 
     if (*strtime == '@')
@@ -152,16 +152,7 @@ _parse_time(time_t *time, char *strtime)
         return 1;
       }
 
-    if ((t = getdate(strtime)) == NULL)
-      {
-        fprintf(stderr, "getdate call failed: %d\n", getdate_err);
-        return 0;
-      }
-
-    if ((*time = mktime(t)) == -1)
-      return 0;
-
-    return 1;
+    return 0;
   }
 
 void
