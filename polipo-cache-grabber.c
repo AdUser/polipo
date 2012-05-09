@@ -532,6 +532,22 @@ matchBySize(DiskObjectFilter *filter, int size)
   }
 
 int
+matchByMtime(DiskObjectFilter *filter, time_t mtime)
+  {
+    if (filter == NULL)
+      return -1;
+
+    if (mtime == 0)
+      return 0;
+
+    if (filter->mtime_min <= mtime &&
+        filter->mtime_max >= mtime)
+      return 1;
+
+    return 0;
+  }
+
+int
 cache_walk(AtomPtr diskCacheRoot)
   {
     FTS *fts;
@@ -585,6 +601,9 @@ cache_walk(AtomPtr diskCacheRoot)
               /* we can do this, because size(diskobject) > size(body) */
               if (filter.size_min != 0 && st != NULL &&
                   filter.size_min > st->st_size)
+                continue;
+
+              if (st != NULL && matchByMtime(&filter, st->st_mtime) != 1)
                 continue;
 
               /* maybe in next line is a bug with "st" */
